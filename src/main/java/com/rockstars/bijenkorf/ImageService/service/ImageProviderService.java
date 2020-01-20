@@ -15,7 +15,7 @@ public class ImageProviderService {
     static final String ORIGINAL_TYPENAME = "original";
 
     public byte[] loadOptimizedImage(String typeName, String fileName) throws IOException {
-        var file = new File(AWS_FOLDER + typeName + "/" + fileName);
+        var file = new File(getFolderForTypeName(typeName, fileName) + fileName);
         return Files.readAllBytes(file.toPath());
     }
 
@@ -32,10 +32,11 @@ public class ImageProviderService {
     }
 
     public void saveOptimizedImage(ByteArrayOutputStream optimizedImageStream, String typeName, String fileName, String formatName) throws IOException {
-        File folder = new File(AWS_FOLDER + typeName + "/");
-        folder.mkdirs();
+        String folder = getFolderForTypeName(typeName, fileName);
+        File folderFile = new File(folder);
+        folderFile.mkdirs();
 
-        File file = new File(AWS_FOLDER + typeName + "/" + fileName);
+        File file = new File(folder + fileName);
         file.createNewFile();
 
         OutputStream fileOutputStream = new FileOutputStream(file);
@@ -46,23 +47,44 @@ public class ImageProviderService {
         return new ClassPathResource(SOURCE_FOLDER + fileName);
     }
 
-    private BufferedImage loadImageFromFile(String folder, String fileName) throws IOException {
-        var file = new File(AWS_FOLDER + folder + "/" + fileName);
+    private BufferedImage loadImageFromFile(String typeName, String fileName) throws IOException {
+        String folder = getFolderForTypeName(typeName, fileName);
+        var file = new File(folder + fileName);
         return ImageIO.read(file);
     }
 
-    private void saveFile(InputStream inputStream, String destinationFolder, String fileName) throws IOException {
+    private void saveFile(InputStream inputStream, String typeName, String fileName) throws IOException {
         byte[] buffer = new byte[inputStream.available()];
         inputStream.read(buffer);
 
-        File targetFolder = new File(AWS_FOLDER + destinationFolder);
-        targetFolder.mkdirs();
+        String targetFolder = getFolderForTypeName(typeName, fileName);
+        File targetFolderFile = new File(targetFolder);
+        targetFolderFile.mkdirs();
 
-        File targetFile = new File(AWS_FOLDER + destinationFolder + "/" + fileName);
+        File targetFile = new File(targetFolder + fileName);
         targetFile.createNewFile();
 
         OutputStream outStream = new FileOutputStream(targetFile);
         outStream.write(buffer);
         outStream.flush();
+    }
+
+    private String getFolderForTypeName(String typeName, String fileName) {
+        String[] split = fileName.split("\\.");
+        String base;
+        if(split.length > 1) {
+            String extension = split[split.length - 1];
+            base = fileName.substring(0, fileName.length() - extension.length() - 1);
+        } else {
+            base = fileName;
+        }
+        String folder = AWS_FOLDER + typeName + "/";
+        if(base.length() > 4) {
+            folder += fileName.substring(0, 4) + "/";
+            if(base.length() > 8) {
+                folder += fileName.substring(4, 8) + "/";
+            }
+        }
+        return folder;
     }
 }
