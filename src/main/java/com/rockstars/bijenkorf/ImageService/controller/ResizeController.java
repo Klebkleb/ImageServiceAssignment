@@ -27,6 +27,23 @@ public class ResizeController {
 
     @GetMapping(value = {"/show/{typeName}/{seoName}", "/show/{typeName}"})
     public ResponseEntity<byte[]> getImage(@PathVariable() String typeName, @PathVariable(required = false) String seoName, @RequestParam() String reference) {
+        PredefinedImageType predefinedImageType;
+        try {
+            predefinedImageType = resizeService.getImageTypeByTypeName(typeName);
+        } catch(IOException e) {
+            System.out.println("typeName does not exist");
+            return ResponseEntity.notFound().build();
+        }
+
+        try {
+            byte[] imageArray = imageProviderService.loadOptimizedImage(typeName, reference);
+            return ResponseEntity.ok()
+                    .contentType(predefinedImageType.getMediaType())
+                    .body(imageArray);
+        } catch( IOException e) {
+            System.out.println("Optimized image not found, trying original image");
+        }
+
         BufferedImage image;
         try {
             image = imageProviderService.loadOriginalImage(reference);
@@ -35,12 +52,12 @@ public class ResizeController {
         }
 
         try {
-            PredefinedImageType predefinedImageType = resizeService.getImageTypeByTypeName(typeName);
-            byte[] resizedImageBytes = resizeService.getResizedImageBytes(image, predefinedImageType);
+            ByteArrayOutputStream resizedImageBytes = resizeService.getResizedImageBytes(image, predefinedImageType);
+            imageProviderService.saveOptimizedImage(resizedImageBytes, typeName, reference, predefinedImageType.getType().getType());
 
             return ResponseEntity.ok()
                     .contentType(predefinedImageType.getMediaType())
-                    .body(resizedImageBytes);
+                    .body(resizedImageBytes.toByteArray());
 
         } catch(Exception e) {
             return ResponseEntity.notFound().build();

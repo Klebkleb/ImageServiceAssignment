@@ -18,7 +18,7 @@ import java.io.IOException;
 @Service
 public class ResizeService {
 
-    public byte[] getResizedImageBytes(BufferedImage sourceImage, PredefinedImageType predefinedImageType) throws IOException {
+    public ByteArrayOutputStream getResizedImageBytes(BufferedImage sourceImage, PredefinedImageType predefinedImageType) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedImage resizedImage = resizeImage(sourceImage, predefinedImageType);
         if (predefinedImageType.getType() == ImageType.JPG) {
@@ -27,7 +27,7 @@ public class ResizeService {
             ImageIO.write( resizedImage, predefinedImageType.getType().getType(), outputStream );
         }
         outputStream.flush();
-        return outputStream.toByteArray();
+        return outputStream;
     }
 
     private void compressJpeg(BufferedImage sourceImage, ByteArrayOutputStream outputStream, int quality) throws IOException {

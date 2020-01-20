@@ -29,4 +29,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### User ###
 .DS_Store
+/aws_images/**
