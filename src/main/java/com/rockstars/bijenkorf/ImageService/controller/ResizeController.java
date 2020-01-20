@@ -1,5 +1,6 @@
 package com.rockstars.bijenkorf.ImageService.controller;
 
+import com.rockstars.bijenkorf.ImageService.model.PredefinedImageType;
 import com.rockstars.bijenkorf.ImageService.service.ImageProviderService;
 import com.rockstars.bijenkorf.ImageService.service.ResizeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,10 +35,11 @@ public class ResizeController {
         }
 
         try {
-            byte[] resizedImageBytes = resizeService.getResizedImageBytes(image, typeName);
+            PredefinedImageType predefinedImageType = resizeService.getImageTypeByTypeName(typeName);
+            byte[] resizedImageBytes = resizeService.getResizedImageBytes(image, predefinedImageType);
 
             return ResponseEntity.ok()
-                    .contentType(MediaType.IMAGE_JPEG)
+                    .contentType(predefinedImageType.getMediaType())
                     .body(resizedImageBytes);
 
         } catch(Exception e) {

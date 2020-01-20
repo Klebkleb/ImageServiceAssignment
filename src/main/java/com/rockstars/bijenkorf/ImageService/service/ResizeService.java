@@ -14,9 +14,7 @@ import java.io.IOException;
 @Service
 public class ResizeService {
 
-    public byte[] getResizedImageBytes(BufferedImage sourceImage, String typeName) throws IOException {
-        PredefinedImageType predefinedImageType;
-        predefinedImageType = getImageTypeByTypeName(typeName);
+    public byte[] getResizedImageBytes(BufferedImage sourceImage, PredefinedImageType predefinedImageType) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedImage resizedImage = resizeImage(sourceImage, predefinedImageType);
         ImageIO.write( resizedImage, predefinedImageType.getType().getType(), outputStream );
@@ -105,7 +103,7 @@ public class ResizeService {
 
     }
 
-    private PredefinedImageType getImageTypeByTypeName(String typeName) throws IOException {
+    public PredefinedImageType getImageTypeByTypeName(String typeName) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         var resource = new ClassPathResource("imagetype/" + typeName + ".json");
         return objectMapper.readValue(resource.getInputStream(), PredefinedImageType.class);
