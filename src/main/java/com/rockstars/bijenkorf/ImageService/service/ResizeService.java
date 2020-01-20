@@ -1,11 +1,15 @@
 package com.rockstars.bijenkorf.ImageService.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.rockstars.bijenkorf.ImageService.model.ImageType;
 import com.rockstars.bijenkorf.ImageService.model.PredefinedImageType;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
@@ -17,9 +21,25 @@ public class ResizeService {
     public byte[] getResizedImageBytes(BufferedImage sourceImage, PredefinedImageType predefinedImageType) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedImage resizedImage = resizeImage(sourceImage, predefinedImageType);
-        ImageIO.write( resizedImage, predefinedImageType.getType().getType(), outputStream );
+        if (predefinedImageType.getType() == ImageType.JPG) {
+            compressJpeg(resizedImage, outputStream, predefinedImageType.getQuality());
+        } else {
+            ImageIO.write( resizedImage, predefinedImageType.getType().getType(), outputStream );
+        }
         outputStream.flush();
         return outputStream.toByteArray();
+    }
+
+    private void compressJpeg(BufferedImage sourceImage, ByteArrayOutputStream outputStream, int quality) throws IOException {
+        ImageWriter writer  = ImageIO.getImageWritersByFormatName("jpg").next();
+        ImageWriteParam param = writer.getDefaultWriteParam();
+
+        param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(quality / 100f);
+
+        writer.setOutput(ImageIO.createImageOutputStream(outputStream));
+        writer.write(null, new IIOImage(sourceImage, null, null), param);
+        writer.dispose();
     }
 
     private BufferedImage resizeImage(BufferedImage sourceImage, PredefinedImageType predefinedImageType) {
