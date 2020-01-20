@@ -1,5 +1,7 @@
 package com.rockstars.bijenkorf.ImageService.model;
 
+import org.springframework.http.MediaType;
+
 public class PredefinedImageType {
     private int height;
     private int width;
@@ -54,5 +56,14 @@ public class PredefinedImageType {
 
     public void setType(ImageType type) {
         this.type = type;
+    }
+
+    public MediaType getMediaType() {
+        switch(type) {
+            case PNG:
+                return MediaType.IMAGE_PNG;
+            default:
+                return MediaType.IMAGE_JPEG;
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.rockstars.bijenkorf.ImageService.controller;
 
-import com.rockstars.bijenkorf.ImageService.model.PredefinedImageType;
 import com.rockstars.bijenkorf.ImageService.service.ImageProviderService;
 import com.rockstars.bijenkorf.ImageService.service.ResizeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +24,6 @@ public class ResizeController {
     @Autowired
     ImageProviderService imageProviderService;
 
-    @GetMapping("test/{imageType}")
-    public ResponseEntity<PredefinedImageType> getImageType(@PathVariable() String imageType) {
-        try {
-            var predefinedImageType = resizeService.getImageType(imageType);
-            return ResponseEntity.ok(predefinedImageType);
-        } catch (IOException e) {
-            return ResponseEntity.notFound().build();
-        }
-    }
-
     @GetMapping(value = {"/show/{typeName}/{seoName}", "/show/{typeName}"})
     public ResponseEntity<byte[]> getImage(@PathVariable() String typeName, @PathVariable(required = false) String seoName, @RequestParam() String reference) {
         BufferedImage image;
@@ -45,14 +34,11 @@ public class ResizeController {
         }
 
         try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            ImageIO.write( image, "jpg", outputStream );
-            outputStream.flush();
-            byte[] imageBytes = outputStream.toByteArray();
+            byte[] resizedImageBytes = resizeService.getResizedImageBytes(image, typeName);
 
             return ResponseEntity.ok()
                     .contentType(MediaType.IMAGE_JPEG)
-                    .body(imageBytes);
+                    .body(resizedImageBytes);
 
         } catch(Exception e) {
             return ResponseEntity.notFound().build();
