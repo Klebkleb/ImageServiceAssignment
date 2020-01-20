@@ -7,7 +7,7 @@ public class PredefinedImageType {
     private int width;
     private int quality;
     private ScaleType scaleType;
-    private String fillColor;
+    private int fillColor;
     private ImageType type;
 
     public int getHeight() {
@@ -42,12 +42,15 @@ public class PredefinedImageType {
         this.scaleType = scaleType;
     }
 
-    public String getFillColor() {
+    public int getFillColor() {
         return fillColor;
     }
 
-    public void setFillColor(String fillColor) {
-        this.fillColor = fillColor;
+    public void setFillColor(String fillColorHex) {
+        if (fillColorHex.charAt(0) == '#') {
+            fillColorHex = fillColorHex.substring(1);
+        }
+        this.fillColor = Integer.parseInt(fillColorHex, 16);
     }
 
     public ImageType getType() {

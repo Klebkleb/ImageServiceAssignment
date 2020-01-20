@@ -29,10 +29,80 @@ public class ResizeService {
 
         // scales the source image to the result image
         Graphics2D g2d = resultImage.createGraphics();
-        g2d.drawImage(sourceImage, 0, 0, predefinedImageType.getWidth(), predefinedImageType.getHeight(), null);
+        switch (predefinedImageType.getScaleType()) {
+            case CROP:
+                drawCroppedImage(g2d,sourceImage, predefinedImageType.getWidth(), predefinedImageType.getHeight());
+                break;
+            case FILL:
+                drawFilledImage(g2d, sourceImage, predefinedImageType.getWidth(), predefinedImageType.getHeight(), predefinedImageType.getFillColor());
+                break;
+            default:
+                drawSkewedImage(g2d, sourceImage, predefinedImageType.getWidth(), predefinedImageType.getHeight());
+                break;
+        }
         g2d.dispose();
 
         return resultImage;
+    }
+
+    private void drawSkewedImage(Graphics2D g2d, BufferedImage sourceImage, int width, int height) {
+        g2d.drawImage(sourceImage, 0, 0, width, height, null);
+    }
+
+    private void drawCroppedImage(Graphics2D g2d, BufferedImage sourceImage, int width, int height) {
+
+        float widthRatio = (float)sourceImage.getWidth() / width;
+        float heightRatio =(float)sourceImage.getHeight() / height;
+        float targetAspectRatio = (float)width / height;
+
+        int sourceRectangleWidth;
+        int sourceRectangleHeight;
+        int startX;
+        int startY;
+        if(widthRatio > heightRatio){ //shrink to fixed height
+            sourceRectangleWidth = Math.round(sourceImage.getHeight() * targetAspectRatio);
+            sourceRectangleHeight = sourceImage.getHeight();
+            startX = sourceImage.getWidth() / 2 - sourceRectangleWidth / 2;
+            startY = 0;
+        } else { //shrink to fixed width
+            sourceRectangleWidth = sourceImage.getWidth();
+            sourceRectangleHeight = Math.round(sourceImage.getWidth() / targetAspectRatio);
+            startY = sourceImage.getHeight() / 2 - sourceRectangleHeight / 2;
+            startX = 0;
+        }
+
+        g2d.drawImage(sourceImage, 0,0,width,height,startX,startY,startX + sourceRectangleWidth, startY + sourceRectangleHeight, null);
+    }
+
+    private void drawFilledImage(Graphics2D g2d, BufferedImage sourceImage, int width, int height, int color) {
+        int sourceWidth = sourceImage.getWidth();
+        int sourceHeight = sourceImage.getHeight();
+        int destinationRectangleWidth = sourceWidth;
+        int destinationRectangleHeight = sourceHeight;
+
+        // first check if we need to scale width
+        if (sourceWidth > width) {
+            //scale width to fit
+            destinationRectangleWidth = width;
+            //scale height to maintain aspect ratio
+            destinationRectangleHeight = (destinationRectangleWidth * sourceHeight) / sourceWidth;
+        }
+
+        // then check if we need to scale even with the new height
+        if (destinationRectangleHeight > height) {
+            //scale height to fit instead
+            destinationRectangleHeight = height;
+            //scale width to maintain aspect ratio
+            destinationRectangleWidth = (destinationRectangleHeight * sourceWidth) / sourceHeight;
+        }
+
+        int startX = width / 2 - destinationRectangleWidth / 2;
+        int startY = height / 2 - destinationRectangleHeight / 2;
+
+        g2d.setColor(new Color(color));
+        g2d.fillRect(0,0, width, height);
+        g2d.drawImage(sourceImage,startX,startY,startX + destinationRectangleWidth,startY + destinationRectangleHeight, 0,0,sourceWidth, sourceHeight, null);
+
     }
 
     private PredefinedImageType getImageTypeByTypeName(String typeName) throws IOException {
