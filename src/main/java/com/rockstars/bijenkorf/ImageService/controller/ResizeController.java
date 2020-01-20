@@ -36,41 +36,51 @@ public class ResizeController {
     @GetMapping(value = {"/show/{typeName}/{seoName}", "/show/{typeName}"})
     public ResponseEntity<byte[]> getImage(@PathVariable() String typeName, @PathVariable(required = false) String seoName, @RequestParam() String reference) {
 
+        // Convert '/' to '_'
         String safeFileName = getSafeFileName(reference);
 
+        // Get predefined type from json file
         PredefinedImageType predefinedImageType;
         try {
             predefinedImageType = resizeService.getImageTypeByTypeName(typeName);
         } catch(IOException e) {
-            System.out.println("typeName does not exist");
+            System.out.println("typeName does not exist.");
             return ResponseEntity.notFound().build();
         }
 
+        // Try to load the optimized image from disk.
         try {
             byte[] imageArray = imageProviderService.loadOptimizedImage(typeName, safeFileName);
+            System.out.println("Optimized image found.");
             return ResponseEntity.ok()
                     .contentType(predefinedImageType.getMediaType())
                     .body(imageArray);
         } catch( IOException e) {
-            System.out.println("Optimized image not found, trying original image");
+            System.out.println("Optimized image not found, trying original image.");
         }
 
+        // Try to load the original image (first from disk then from source).
         BufferedImage image;
         try {
             image = imageProviderService.loadOriginalImage(safeFileName);
+            System.out.println("Original image loaded correctly.");
         } catch(IOException e) {
+            System.out.println("Could not load original image.");
             return ResponseEntity.notFound().build();
         }
 
+        // Resize image and save the result to disk.
         try {
             ByteArrayOutputStream resizedImageBytes = resizeService.getResizedImageBytes(image, predefinedImageType);
+            System.out.println("Resized image correctly.");
             imageProviderService.saveOptimizedImage(resizedImageBytes, typeName, safeFileName);
-
+            System.out.println("Saved optimized image correctly.");
             return ResponseEntity.ok()
                     .contentType(predefinedImageType.getMediaType())
                     .body(resizedImageBytes.toByteArray());
 
         } catch(Exception e) {
+            System.out.println("Could not resize or save image.");
             return ResponseEntity.notFound().build();
         }
 
