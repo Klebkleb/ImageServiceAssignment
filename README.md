@@ -18,6 +18,7 @@ localhost:8080/image/show/{predefined-type-name}/{dummy-seo-name}/?reference={un
 - Storing of original images
 - Storing of optimized images
 - Requested naming scheme
+- Variable Jpeg compression
 
 ## Not implemented features ##
 - Amazon AWS (Too much hassle for 6 hours :P, used file system instead)
