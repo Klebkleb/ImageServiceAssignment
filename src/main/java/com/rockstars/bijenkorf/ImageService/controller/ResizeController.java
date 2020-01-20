@@ -4,15 +4,14 @@ import com.rockstars.bijenkorf.ImageService.model.PredefinedImageType;
 import com.rockstars.bijenkorf.ImageService.service.ImageProviderService;
 import com.rockstars.bijenkorf.ImageService.service.ResizeService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-@RestController("/image")
+@RestController()
+@RequestMapping("/image")
 public class ResizeController {
 
     final
