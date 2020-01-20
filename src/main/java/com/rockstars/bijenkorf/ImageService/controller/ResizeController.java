@@ -27,6 +27,9 @@ public class ResizeController {
 
     @GetMapping(value = {"/show/{typeName}/{seoName}", "/show/{typeName}"})
     public ResponseEntity<byte[]> getImage(@PathVariable() String typeName, @PathVariable(required = false) String seoName, @RequestParam() String reference) {
+
+        String safeFileName = getSafeFileName(reference);
+
         PredefinedImageType predefinedImageType;
         try {
             predefinedImageType = resizeService.getImageTypeByTypeName(typeName);
@@ -36,7 +39,7 @@ public class ResizeController {
         }
 
         try {
-            byte[] imageArray = imageProviderService.loadOptimizedImage(typeName, reference);
+            byte[] imageArray = imageProviderService.loadOptimizedImage(typeName, safeFileName);
             return ResponseEntity.ok()
                     .contentType(predefinedImageType.getMediaType())
                     .body(imageArray);
@@ -46,14 +49,14 @@ public class ResizeController {
 
         BufferedImage image;
         try {
-            image = imageProviderService.loadOriginalImage(reference);
+            image = imageProviderService.loadOriginalImage(safeFileName);
         } catch(IOException e) {
             return ResponseEntity.notFound().build();
         }
 
         try {
             ByteArrayOutputStream resizedImageBytes = resizeService.getResizedImageBytes(image, predefinedImageType);
-            imageProviderService.saveOptimizedImage(resizedImageBytes, typeName, reference, predefinedImageType.getType().getType());
+            imageProviderService.saveOptimizedImage(resizedImageBytes, typeName, safeFileName);
 
             return ResponseEntity.ok()
                     .contentType(predefinedImageType.getMediaType())
@@ -63,5 +66,9 @@ public class ResizeController {
             return ResponseEntity.notFound().build();
         }
 
+    }
+
+    private String getSafeFileName(String reference) {
+        return reference.replace('/', '_');
     }
 }

@@ -31,7 +31,7 @@ public class ImageProviderService {
         return loadImageFromFile(ORIGINAL_TYPENAME, fileName);
     }
 
-    public void saveOptimizedImage(ByteArrayOutputStream optimizedImageStream, String typeName, String fileName, String formatName) throws IOException {
+    public void saveOptimizedImage(ByteArrayOutputStream optimizedImageStream, String typeName, String fileName) throws IOException {
         String folder = getFolderForTypeName(typeName, fileName);
         File folderFile = new File(folder);
         folderFile.mkdirs();
