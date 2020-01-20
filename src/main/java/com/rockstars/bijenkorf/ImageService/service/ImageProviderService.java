@@ -14,11 +14,24 @@ public class ImageProviderService {
     static final String SOURCE_FOLDER = "image/";
     static final String ORIGINAL_TYPENAME = "original";
 
+    /**
+     * Load the optimized image from disk. Throws an IOException if the image does not exist.
+     * @param typeName - The name of the predefined resize type requested
+     * @param fileName - The unique name of the file
+     * @return - A byte array of the resized image
+     * @throws IOException - Gets thrown if the image does not exist.
+     */
     public byte[] loadOptimizedImage(String typeName, String fileName) throws IOException {
         var file = new File(getFolderForTypeName(typeName, fileName) + fileName);
         return Files.readAllBytes(file.toPath());
     }
 
+    /**
+     * Get the original image from disk, throws IOException if the image does not exist.
+     * @param fileName - The unique filename of the image.
+     * @return - A buffered image
+     * @throws IOException - Gets thrown if the image does not exist.
+     */
     public BufferedImage loadOriginalImage(String fileName) throws IOException {
         try {
             return loadImageFromFile(ORIGINAL_TYPENAME, fileName);
@@ -31,6 +44,13 @@ public class ImageProviderService {
         return loadImageFromFile(ORIGINAL_TYPENAME, fileName);
     }
 
+    /**
+     * Save the optimized image to disk. Throws IOException if something goes wrong.
+     * @param optimizedImageStream - The outputstream of the image
+     * @param typeName - The name of the predefined resize type, used to determine the save location
+     * @param fileName - The unique name of the file
+     * @throws IOException - Gets thrown when an error occurs during saving
+     */
     public void saveOptimizedImage(ByteArrayOutputStream optimizedImageStream, String typeName, String fileName) throws IOException {
         String folder = getFolderForTypeName(typeName, fileName);
         File folderFile = new File(folder);

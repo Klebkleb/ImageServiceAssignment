@@ -18,6 +18,13 @@ import java.io.IOException;
 @Service
 public class ResizeService {
 
+    /**
+     * Resizes the image according to the predefined type, returns new image in the form of a byte array stream.
+     * @param sourceImage - The original image
+     * @param predefinedImageType - The object detailing how to resize it
+     * @return - A ByteArrayOutputStream containing the new image
+     * @throws IOException
+     */
     public ByteArrayOutputStream getResizedImageBytes(BufferedImage sourceImage, PredefinedImageType predefinedImageType) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         BufferedImage resizedImage = resizeImage(sourceImage, predefinedImageType);
@@ -28,6 +35,18 @@ public class ResizeService {
         }
         outputStream.flush();
         return outputStream;
+    }
+
+    /**
+     * Get the predefined type from disk.
+     * @param typeName - Name of the predefined type
+     * @return - The predefined type loaded from json
+     * @throws IOException - Throws an IOException if the predefined type couldn't be found
+     */
+    public PredefinedImageType getImageTypeByTypeName(String typeName) throws IOException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        var resource = new ClassPathResource("imagetype/" + typeName + ".json");
+        return objectMapper.readValue(resource.getInputStream(), PredefinedImageType.class);
     }
 
     private void compressJpeg(BufferedImage sourceImage, ByteArrayOutputStream outputStream, int quality) throws IOException {
@@ -44,9 +63,9 @@ public class ResizeService {
 
     private BufferedImage resizeImage(BufferedImage sourceImage, PredefinedImageType predefinedImageType) {
         BufferedImage resultImage = new BufferedImage(predefinedImageType.getWidth(), predefinedImageType.getHeight(), sourceImage.getType());
-
-        // scales the source image to the result image
         Graphics2D g2d = resultImage.createGraphics();
+
+        // Switch different scaling types
         switch (predefinedImageType.getScaleType()) {
             case CROP:
                 drawCroppedImage(g2d,sourceImage, predefinedImageType.getWidth(), predefinedImageType.getHeight());
@@ -121,11 +140,5 @@ public class ResizeService {
         g2d.fillRect(0,0, width, height);
         g2d.drawImage(sourceImage,startX,startY,startX + destinationRectangleWidth,startY + destinationRectangleHeight, 0,0,sourceWidth, sourceHeight, null);
 
-    }
-
-    public PredefinedImageType getImageTypeByTypeName(String typeName) throws IOException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        var resource = new ClassPathResource("imagetype/" + typeName + ".json");
-        return objectMapper.readValue(resource.getInputStream(), PredefinedImageType.class);
     }
 }
