@@ -24,3 +24,9 @@ localhost:8080/image/show/{predefined-type-name}/{dummy-seo-name}/?reference={un
 - Error logging (Only basic console logs in place)
 - Flushing images
 - Environments
+
+## Structure ##
+- ResizeController: Contains the endpoint, calls the services, serves images.
+- ImageProviderService: Emulates AWS. Gets images from resources. Saves and loads images from disk.
+- ResizeService: Handles the logic for resizing images. Loads predefined image types from disk.
+- PredefinedImageType: Contains the model for the predefined image types. Loaded from json in the ResizeRervice.
